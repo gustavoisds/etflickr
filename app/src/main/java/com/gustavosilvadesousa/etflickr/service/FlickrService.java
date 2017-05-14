@@ -19,6 +19,8 @@ public class FlickrService {
     private static final String API_KEY = "api_key";
     private static final String FORMAT = "format";
     private static final String NOJSONCALLBACK = "nojsoncallback";
+    private static final String MINI_TOKEN = "mini_token";
+    public static final String AUTH_TOKEN = "auth_token";
 
     public FlickrApi init() {
 
@@ -53,6 +55,7 @@ public class FlickrService {
                 HttpUrl url = originalHttpUrl.newBuilder()
                         .addQueryParameter(API_KEY, "1b4c450c1feb07a5bc17981308124c06")
                         .addQueryParameter(FORMAT, "json")
+                        .addQueryParameter(AUTH_TOKEN,"72157680757377963-b457215f031ddeb9" )
                         .addQueryParameter(NOJSONCALLBACK,"1")
                         .build();
 

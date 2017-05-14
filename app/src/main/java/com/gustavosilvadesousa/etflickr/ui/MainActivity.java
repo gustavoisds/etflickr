@@ -6,7 +6,7 @@ import android.util.Log;
 
 import com.gustavosilvadesousa.etflickr.R;
 import com.gustavosilvadesousa.etflickr.service.FlickrService;
-import com.gustavosilvadesousa.etflickr.service.FrobApiResponse;
+import com.gustavosilvadesousa.etflickr.service.TokenResponse;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -21,16 +21,16 @@ public class MainActivity extends AppCompatActivity {
 
         FlickrService flickrService = new FlickrService();
 
-        Call<FrobApiResponse> call = flickrService.init().getFrob();
+        Call<TokenResponse> call = flickrService.init().getToken();
 
-        call.enqueue(new Callback<FrobApiResponse>() {
+        call.enqueue(new Callback<TokenResponse>() {
             @Override
-            public void onResponse(Call<FrobApiResponse> call, Response<FrobApiResponse> response) {
+            public void onResponse(Call<TokenResponse> call, Response<TokenResponse> response) {
 
                 try {
 
-                    FrobApiResponse a = response.body();
-                    String frob = a.getFrob().getContent();
+                    TokenResponse a = response.body();
+                    a.getUser();
 
                 } catch (Exception e) {
                     Log.d("onResponse", "There is an error");
@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<FrobApiResponse> call, Throwable t) {
+            public void onFailure(Call<TokenResponse> call, Throwable t) {
                 Log.d("onFailure", t.getMessage());
             }
 
