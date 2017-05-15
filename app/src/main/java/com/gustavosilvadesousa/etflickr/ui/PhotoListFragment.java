@@ -15,16 +15,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.gustavosilvadesousa.etflickr.R;
 import com.gustavosilvadesousa.etflickr.domain.Photo;
 import com.gustavosilvadesousa.etflickr.service.FlickrService;
 import com.gustavosilvadesousa.etflickr.service.SearchPhotosResponse;
 import com.gustavosilvadesousa.etflickr.utils.ConnectionUtils;
-import com.squareup.picasso.NetworkPolicy;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,8 +60,8 @@ public class PhotoListFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(getLayoutManager());
-        PhotoAdapter adapter = new PhotoAdapter(photos);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        adapter = new PhotoRowAdapter(photos);
         mRecyclerView.setAdapter(adapter);
 
         swipeContainer = (SwipeRefreshLayout)view.findViewById(R.id.swipeContainer);
@@ -95,7 +91,7 @@ public class PhotoListFragment extends Fragment {
         switch (item.getItemId()) {
 
             case R.id.action_change_layout: {
-                mRecyclerView.setLayoutManager(getLayoutManager());
+                swapLayoutManager();
                 return true;
             }
             default:
@@ -106,24 +102,20 @@ public class PhotoListFragment extends Fragment {
     }
 
     private void updateView() {
-        if (adapter == null) {
-            adapter = new PhotoAdapter(photos);
-            mRecyclerView.setAdapter(adapter);
-        }
-        else {
-            adapter.clear();
-            adapter.addAll(photos);
-        }
+        adapter.clear();
+        adapter.addAll(photos);
         if (snackbar != null && snackbar.isShown()) {
             snackbar.dismiss();
         }
         stopLoading();
     }
 
-    private RecyclerView.LayoutManager getLayoutManager() {
-        RecyclerView.LayoutManager manager = gridView ? new LinearLayoutManager(getActivity()) : new GridLayoutManager(getActivity(), 3);
+    private void swapLayoutManager() {
+        RecyclerView.LayoutManager manager = gridView ? new GridLayoutManager(getActivity(), 3) : new LinearLayoutManager(getActivity());
+        RecyclerView.Adapter adapter = gridView ? new PhotoGridAdapter(photos) : new PhotoRowAdapter(photos);
+        mRecyclerView.setLayoutManager(manager);
+        mRecyclerView.swapAdapter(adapter, false);
         gridView = !gridView;
-        return manager;
     }
 
     private void fetchPhotos() {
@@ -174,58 +166,5 @@ public class PhotoListFragment extends Fragment {
 
     private void stopLoading() {
         swipeContainer.setRefreshing(false);
-    }
-
-    public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoViewHolder>{
-
-        List<Photo> photos = new ArrayList<>();
-
-        public PhotoAdapter(List<Photo> photos) {
-            this.photos = photos;
-        }
-
-        @Override
-        public PhotoViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.photo_item, parent, false);
-            PhotoViewHolder photoViewHolder = new PhotoViewHolder(v);
-            return photoViewHolder;
-        }
-
-        @Override
-        public void onBindViewHolder(PhotoViewHolder holder, int position) {
-            String urlImage = photos.get(position).getUrl();
-            if ((urlImage != null) && (!urlImage.isEmpty())) {
-                Picasso.with(holder.imageView.getContext())
-                        .load(urlImage)
-                        .networkPolicy(NetworkPolicy.OFFLINE)
-                        .fit()
-                        .into(holder.imageView);
-            }
-        }
-
-        public void clear() {
-            photos.clear();
-            notifyDataSetChanged();
-        }
-
-        public void addAll(List<Photo> photos) {
-            this.photos.addAll(photos);
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public int getItemCount() {
-            return photos.size();
-        }
-
-        public class PhotoViewHolder extends RecyclerView.ViewHolder {
-            ImageView imageView;
-
-            PhotoViewHolder(View itemView) {
-                super(itemView);
-                imageView = (ImageView) itemView.findViewById(R.id.photoImage);
-            }
-        }
-
     }
 }
