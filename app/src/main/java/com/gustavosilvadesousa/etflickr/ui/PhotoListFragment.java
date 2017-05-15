@@ -3,6 +3,7 @@ package com.gustavosilvadesousa.etflickr.ui;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -29,13 +30,18 @@ import retrofit2.Response;
 public class PhotoListFragment extends Fragment {
 
     private RecyclerView mRecyclerView;
-    private List<Photo> photos = new ArrayList<>();
+    private PhotoAdapter adapter;
+    private SwipeRefreshLayout swipeContainer;
 
+    private List<Photo> photos = new ArrayList<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        fetchPhotos();
+    }
 
+    private void fetchPhotos() {
         FlickrService flickrService = FlickrService.getInstance();
 
         Call<SearchPhotosResponse> call = flickrService.getFlickrApi().getPhotos("154797495@N05");
@@ -79,16 +85,38 @@ public class PhotoListFragment extends Fragment {
         mRecyclerView.setLayoutManager(llm);
         PhotoAdapter adapter = new PhotoAdapter(photos);
         mRecyclerView.setAdapter(adapter);
+
+        swipeContainer = (SwipeRefreshLayout)view.findViewById(R.id.swipeContainer);
+        // Setup refresh listener which triggers new data loading
+        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                fetchPhotos();
+            }
+        });
+        // Configure the refreshing colors
+        swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+
     }
 
     private void updateView() {
-        PhotoAdapter adapter = new PhotoAdapter(photos);
-        mRecyclerView.setAdapter(adapter);
+        if (adapter == null) {
+            adapter = new PhotoAdapter(photos);
+            mRecyclerView.setAdapter(adapter);
+        }
+        else {
+            adapter.clear();
+            adapter.addAll(photos);
+        }
+        swipeContainer.setRefreshing(false);
     }
 
     public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoViewHolder>{
 
-        List<Photo> photos;
+        List<Photo> photos = new ArrayList<>();
 
         public PhotoAdapter(List<Photo> photos) {
             this.photos = photos;
@@ -111,6 +139,16 @@ public class PhotoListFragment extends Fragment {
                         .fit()
                         .into(holder.imageView);
             }
+        }
+
+        public void clear() {
+            photos.clear();
+            notifyDataSetChanged();
+        }
+
+        public void addAll(List<Photo> photos) {
+            this.photos.addAll(photos);
+            notifyDataSetChanged();
         }
 
         @Override
