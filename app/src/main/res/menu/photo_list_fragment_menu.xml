@@ -1,0 +1,8 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:myapp="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/action_change_layout"
+        android:icon="@android:drawable/ic_dialog_dialer"
+        android:title="refresh"
+        android:visible="true"
+        myapp:showAsAction="ifRoom|"/>
+</menu>

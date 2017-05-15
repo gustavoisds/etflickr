@@ -5,10 +5,14 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -35,12 +39,15 @@ public class PhotoListFragment extends Fragment {
     private PhotoAdapter adapter;
     private SwipeRefreshLayout swipeContainer;
     private Snackbar snackbar;
+    private boolean gridView = false;
 
     private List<Photo> photos = new ArrayList<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+        setHasOptionsMenu(true);
         fetchPhotos();
     }
 
@@ -57,8 +64,7 @@ public class PhotoListFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
-        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
-        mRecyclerView.setLayoutManager(llm);
+        mRecyclerView.setLayoutManager(getLayoutManager());
         PhotoAdapter adapter = new PhotoAdapter(photos);
         mRecyclerView.setAdapter(adapter);
 
@@ -78,6 +84,27 @@ public class PhotoListFragment extends Fragment {
 
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.photo_list_fragment_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+
+            case R.id.action_change_layout: {
+                mRecyclerView.setLayoutManager(getLayoutManager());
+                return true;
+            }
+            default:
+                break;
+        }
+
+        return false;
+    }
+
     private void updateView() {
         if (adapter == null) {
             adapter = new PhotoAdapter(photos);
@@ -91,6 +118,12 @@ public class PhotoListFragment extends Fragment {
             snackbar.dismiss();
         }
         stopLoading();
+    }
+
+    private RecyclerView.LayoutManager getLayoutManager() {
+        RecyclerView.LayoutManager manager = gridView ? new LinearLayoutManager(getActivity()) : new GridLayoutManager(getActivity(), 3);
+        gridView = !gridView;
+        return manager;
     }
 
     private void fetchPhotos() {
@@ -112,7 +145,6 @@ public class PhotoListFragment extends Fragment {
                         Log.d("onResponse", "There is an error");
                         e.printStackTrace();
                     }
-
                 }
 
                 @Override
