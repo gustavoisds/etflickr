@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,29 +14,52 @@ import android.widget.TextView;
 
 import com.gustavosilvadesousa.etflickr.R;
 import com.gustavosilvadesousa.etflickr.domain.Photo;
+import com.gustavosilvadesousa.etflickr.service.FlickrService;
+import com.gustavosilvadesousa.etflickr.service.SearchPhotosResponse;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class PhotoListFragment extends Fragment {
 
-    private static final String PHOTOS = "photos";
     private RecyclerView mRecyclerView;
-    private List<Photo> photos;
+    private List<Photo> photos = new ArrayList<>();
 
-    public static PhotoListFragment newInstance(ArrayList<Photo> photos) {
-        PhotoListFragment fragment = new PhotoListFragment();
-        Bundle bundle = new Bundle();
-        bundle.putSerializable(PHOTOS, photos);
-        fragment.setArguments(bundle);
-        return fragment;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        photos = (List<Photo>)getArguments().getSerializable(PHOTOS);
+
+        FlickrService flickrService = FlickrService.getInstance();
+
+        Call<SearchPhotosResponse> call = flickrService.getFlickrApi().getPhotos("154797495@N05");
+
+        call.enqueue(new Callback<SearchPhotosResponse>() {
+            @Override
+            public void onResponse(Call<SearchPhotosResponse> call, Response<SearchPhotosResponse> response) {
+
+                try {
+                    SearchPhotosResponse searchPhotosResponse = response.body();
+                    photos = searchPhotosResponse.getPhotoInfo().getPhotos();
+                    updateView();
+                } catch (Exception e) {
+                    Log.d("onResponse", "There is an error");
+                    e.printStackTrace();
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<SearchPhotosResponse> call, Throwable t) {
+                Log.d("onFailure", t.getMessage());
+            }
+        });
     }
 
     @Nullable
@@ -53,6 +77,11 @@ public class PhotoListFragment extends Fragment {
         mRecyclerView.setHasFixedSize(true);
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(llm);
+        PhotoAdapter adapter = new PhotoAdapter(photos);
+        mRecyclerView.setAdapter(adapter);
+    }
+
+    private void updateView() {
         PhotoAdapter adapter = new PhotoAdapter(photos);
         mRecyclerView.setAdapter(adapter);
     }
@@ -78,6 +107,7 @@ public class PhotoListFragment extends Fragment {
             if ((urlImage != null) && (!urlImage.isEmpty())) {
                 Picasso.with(holder.imageView.getContext())
                         .load(urlImage)
+                        .networkPolicy(NetworkPolicy.OFFLINE)
                         .fit()
                         .into(holder.imageView);
             }

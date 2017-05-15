@@ -1,16 +1,11 @@
 package com.gustavosilvadesousa.etflickr.service;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class SearchPhotosResponse {
-    private SearchPhotos photos;
+    @JsonProperty("photos")
+    private PhotoInfo photoInfo;
     private String stat;
-
-    public SearchPhotos getPhotos() {
-        return photos;
-    }
-
-    public void setPhotos(SearchPhotos photos) {
-        this.photos = photos;
-    }
 
     public String getStat() {
         return stat;
@@ -18,5 +13,13 @@ public class SearchPhotosResponse {
 
     public void setStat(String stat) {
         this.stat = stat;
+    }
+
+    public PhotoInfo getPhotoInfo() {
+        return photoInfo;
+    }
+
+    public void setPhotoInfo(PhotoInfo photoInfo) {
+        this.photoInfo = photoInfo;
     }
 }

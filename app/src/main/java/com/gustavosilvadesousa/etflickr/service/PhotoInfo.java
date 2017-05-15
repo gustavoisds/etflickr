@@ -7,14 +7,15 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SearchPhotos implements Serializable {
+public class PhotoInfo implements Serializable {
 
     private int page;
     private int pages;
     @JsonProperty("perpage")
     private int perPage;
     private int total;
-    private ArrayList<Photo> photo;
+    @JsonProperty("photo")
+    private ArrayList<Photo> photos;
 
     public int getPage() {
         return page;
@@ -48,12 +49,12 @@ public class SearchPhotos implements Serializable {
         this.total = total;
     }
 
-    public ArrayList<Photo> getPhoto() {
-        return photo;
+
+    public ArrayList<Photo> getPhotos() {
+        return photos;
     }
 
-    public void setPhoto(ArrayList<Photo> photo) {
-        this.photo = photo;
+    public void setPhotos(ArrayList<Photo> photos) {
+        this.photos = photos;
     }
-
 }
