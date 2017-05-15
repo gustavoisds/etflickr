@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.gustavosilvadesousa.etflickr.domain.Photo;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SearchPhotos implements Serializable {
@@ -13,7 +14,7 @@ public class SearchPhotos implements Serializable {
     @JsonProperty("perpage")
     private int perPage;
     private int total;
-    private List<Photo> photo;
+    private ArrayList<Photo> photo;
 
     public int getPage() {
         return page;
@@ -47,11 +48,11 @@ public class SearchPhotos implements Serializable {
         this.total = total;
     }
 
-    public List<Photo> getPhoto() {
+    public ArrayList<Photo> getPhoto() {
         return photo;
     }
 
-    public void setPhoto(List<Photo> photo) {
+    public void setPhoto(ArrayList<Photo> photo) {
         this.photo = photo;
     }
 

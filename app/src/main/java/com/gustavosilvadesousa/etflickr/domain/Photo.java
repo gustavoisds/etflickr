@@ -93,6 +93,7 @@ public class Photo implements Serializable {
         builder.append(id);
         builder.append("_");
         builder.append(secret);
+        builder.append(".jpg");
         return builder.toString();
     }
 
