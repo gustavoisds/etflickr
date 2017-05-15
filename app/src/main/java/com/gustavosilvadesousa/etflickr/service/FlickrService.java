@@ -20,9 +20,22 @@ public class FlickrService {
     private static final String FORMAT = "format";
     private static final String NOJSONCALLBACK = "nojsoncallback";
     private static final String MINI_TOKEN = "mini_token";
-    public static final String AUTH_TOKEN = "auth_token";
+    private static final String AUTH_TOKEN = "auth_token";
 
-    public FlickrApi init() {
+    private static FlickrService INSTANCE = new FlickrService();
+
+    private Retrofit retrofit;
+    private FlickrApi flickrApi;
+
+    private FlickrService(){
+        init();
+    }
+
+    public static FlickrService getInstance() {
+        return INSTANCE;
+    }
+
+    public void init() {
 
         OkHttpClient.Builder httpClient =
                 new OkHttpClient.Builder();
@@ -32,13 +45,13 @@ public class FlickrService {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        Retrofit retrofit = new Retrofit.Builder()
+        this.retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.flickr.com/")
                 .addConverterFactory(JacksonConverterFactory.create(mapper))
                 .client(httpClient.build())
                 .build();
 
-        return retrofit.create(FlickrApi.class);
+        flickrApi =  retrofit.create(FlickrApi.class);
     }
 
     private void addInterceptors(OkHttpClient.Builder httpClient) {
@@ -70,5 +83,9 @@ public class FlickrService {
 
         SignatureInterceptor signatureInterceptor = new SignatureInterceptor();
         httpClient.addInterceptor(signatureInterceptor);
+    }
+
+    public FlickrApi getFlickrApi() {
+        return flickrApi;
     }
 }

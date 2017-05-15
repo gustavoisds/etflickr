@@ -6,7 +6,8 @@ import android.util.Log;
 
 import com.gustavosilvadesousa.etflickr.R;
 import com.gustavosilvadesousa.etflickr.service.FlickrService;
-import com.gustavosilvadesousa.etflickr.service.TokenResponse;
+import com.gustavosilvadesousa.etflickr.service.SearchPhotos;
+import com.gustavosilvadesousa.etflickr.service.SearchPhotosResponse;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -19,19 +20,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        FlickrService flickrService = new FlickrService();
+        FlickrService flickrService = FlickrService.getInstance();
 
-        Call<TokenResponse> call = flickrService.init().getToken();
+        Call<SearchPhotosResponse> call = flickrService.getFlickrApi().getPhotos("154797495@N05");
 
-        call.enqueue(new Callback<TokenResponse>() {
+        call.enqueue(new Callback<SearchPhotosResponse>() {
             @Override
-            public void onResponse(Call<TokenResponse> call, Response<TokenResponse> response) {
+            public void onResponse(Call<SearchPhotosResponse> call, Response<SearchPhotosResponse> response) {
 
                 try {
-
-                    TokenResponse a = response.body();
-                    a.getUser();
-
+                    SearchPhotosResponse a = response.body();
+                    a.getPhotos();
                 } catch (Exception e) {
                     Log.d("onResponse", "There is an error");
                     e.printStackTrace();
@@ -40,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<TokenResponse> call, Throwable t) {
+            public void onFailure(Call<SearchPhotosResponse> call, Throwable t) {
                 Log.d("onFailure", t.getMessage());
             }
 
