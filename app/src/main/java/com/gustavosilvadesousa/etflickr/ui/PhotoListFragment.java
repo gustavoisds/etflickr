@@ -2,6 +2,7 @@ package com.gustavosilvadesousa.etflickr.ui;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,6 +18,7 @@ import com.gustavosilvadesousa.etflickr.R;
 import com.gustavosilvadesousa.etflickr.domain.Photo;
 import com.gustavosilvadesousa.etflickr.service.FlickrService;
 import com.gustavosilvadesousa.etflickr.service.SearchPhotosResponse;
+import com.gustavosilvadesousa.etflickr.utils.ConnectionUtils;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
@@ -32,6 +34,7 @@ public class PhotoListFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private PhotoAdapter adapter;
     private SwipeRefreshLayout swipeContainer;
+    private Snackbar snackbar;
 
     private List<Photo> photos = new ArrayList<>();
 
@@ -39,33 +42,6 @@ public class PhotoListFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         fetchPhotos();
-    }
-
-    private void fetchPhotos() {
-        FlickrService flickrService = FlickrService.getInstance();
-
-        Call<SearchPhotosResponse> call = flickrService.getFlickrApi().getPhotos("154797495@N05");
-
-        call.enqueue(new Callback<SearchPhotosResponse>() {
-            @Override
-            public void onResponse(Call<SearchPhotosResponse> call, Response<SearchPhotosResponse> response) {
-
-                try {
-                    SearchPhotosResponse searchPhotosResponse = response.body();
-                    photos = searchPhotosResponse.getPhotoInfo().getPhotos();
-                    updateView();
-                } catch (Exception e) {
-                    Log.d("onResponse", "There is an error");
-                    e.printStackTrace();
-                }
-
-            }
-
-            @Override
-            public void onFailure(Call<SearchPhotosResponse> call, Throwable t) {
-                Log.d("onFailure", t.getMessage());
-            }
-        });
     }
 
     @Nullable
@@ -111,6 +87,60 @@ public class PhotoListFragment extends Fragment {
             adapter.clear();
             adapter.addAll(photos);
         }
+        if (snackbar != null && snackbar.isShown()) {
+            snackbar.dismiss();
+        }
+        stopLoading();
+    }
+
+    private void fetchPhotos() {
+
+        if (ConnectionUtils.isConnectionAvailable(getActivity())) {
+            FlickrService flickrService = FlickrService.getInstance();
+
+            Call<SearchPhotosResponse> call = flickrService.getFlickrApi().getPhotos("154797495@N05");
+
+            call.enqueue(new Callback<SearchPhotosResponse>() {
+                @Override
+                public void onResponse(Call<SearchPhotosResponse> call, Response<SearchPhotosResponse> response) {
+
+                    try {
+                        SearchPhotosResponse searchPhotosResponse = response.body();
+                        photos = searchPhotosResponse.getPhotoInfo().getPhotos();
+                        updateView();
+                    } catch (Exception e) {
+                        Log.d("onResponse", "There is an error");
+                        e.printStackTrace();
+                    }
+
+                }
+
+                @Override
+                public void onFailure(Call<SearchPhotosResponse> call, Throwable t) {
+                    Log.d("onFailure", t.getMessage());
+                }
+            });
+        }
+        else {
+            stopLoading();
+            snackbar = Snackbar.make(swipeContainer, "No network connection", Snackbar.LENGTH_INDEFINITE)
+                    .setAction("RETRY", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            showLoading();
+                            fetchPhotos();
+                        }
+                    })
+                    .setActionTextColor(getResources().getColor(android.R.color.holo_red_light ));
+            snackbar.show();
+        }
+    }
+
+    private void showLoading() {
+        swipeContainer.setRefreshing(true);
+    }
+
+    private void stopLoading() {
         swipeContainer.setRefreshing(false);
     }
 
