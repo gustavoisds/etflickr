@@ -20,8 +20,7 @@ public class PhotoRowAdapter extends PhotoAdapter {
     @Override
     public PhotoViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.photo_item_row, parent, false);
-        PhotoViewHolder photoViewHolder = new PhotoViewHolder(v);
-        return photoViewHolder;
+        return new PhotoViewHolder(v);
     }
 
     @Override

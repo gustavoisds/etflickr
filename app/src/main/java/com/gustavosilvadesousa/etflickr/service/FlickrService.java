@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
@@ -38,7 +39,8 @@ public class FlickrService {
     public void init() {
 
         OkHttpClient.Builder httpClient =
-                new OkHttpClient.Builder();
+                new OkHttpClient.Builder().readTimeout(5, TimeUnit.SECONDS).connectTimeout(5, TimeUnit.SECONDS);
+
 
         addInterceptors(httpClient);
 

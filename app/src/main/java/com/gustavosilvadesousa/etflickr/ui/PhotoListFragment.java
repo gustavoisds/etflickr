@@ -111,11 +111,11 @@ public class PhotoListFragment extends Fragment {
     }
 
     private void swapLayoutManager() {
+        gridView = !gridView;
         RecyclerView.LayoutManager manager = gridView ? new GridLayoutManager(getActivity(), 3) : new LinearLayoutManager(getActivity());
         RecyclerView.Adapter adapter = gridView ? new PhotoGridAdapter(photos) : new PhotoRowAdapter(photos);
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.swapAdapter(adapter, false);
-        gridView = !gridView;
     }
 
     private void fetchPhotos() {
