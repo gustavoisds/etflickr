@@ -109,8 +109,9 @@ public class PhotoDetailFragment extends Fragment {
             photoTitle.setText(photo.getTitle().getContent());
             photoDate.setText(photo.getDateUploaded());
             DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-            Date date = new Date(Long.parseLong(photo.getDateUploaded()));
-            photoDate.setText(df.format(date));
+
+            long dateLong = Long.parseLong(photo.getDateUploaded());
+            photoDate.setText(df.format(new Date(dateLong*1000)));
         }
 
     }
