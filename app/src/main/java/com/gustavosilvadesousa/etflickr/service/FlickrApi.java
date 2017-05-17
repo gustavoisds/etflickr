@@ -10,6 +10,7 @@ public interface FlickrApi {
     Call<TokenResponse> getToken();
 
     @GET("/services/rest?method=flickr.photos.search")
-    Call<SearchPhotosResponse> getPhotos(@Query("user_id")String user);
+    Call<SearchPhotosResponse> getPhotos(@Query("user_id")String user,
+                                         @Query("privacy_filter") String privacyFilter);
 
 }

@@ -1,11 +1,15 @@
 package com.gustavosilvadesousa.etflickr.ui;
 
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.gustavosilvadesousa.etflickr.R;
 import com.gustavosilvadesousa.etflickr.domain.Photo;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,12 +27,22 @@ public abstract class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.Pho
         return photos.size();
     }
 
-    protected class PhotoViewHolder extends RecyclerView.ViewHolder {
-        ImageView imageView;
+    @Override
+    public PhotoViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View v = LayoutInflater.from(parent.getContext()).inflate(getLayout(), parent, false);
+        PhotoViewHolder photoViewHolder = getHolder(v);
+        return photoViewHolder;
+    }
 
-        PhotoViewHolder(View itemView) {
-            super(itemView);
-            imageView = (ImageView) itemView.findViewById(R.id.photoImage);
+    @Override
+    public void onBindViewHolder(PhotoViewHolder holder, int position) {
+        String urlImage = photos.get(position).getUrl();
+        if ((urlImage != null) && (!urlImage.isEmpty())) {
+            Picasso.with(holder.imageView.getContext())
+                    .load(urlImage)
+                    .networkPolicy(NetworkPolicy.OFFLINE)
+                    .fit()
+                    .into(holder.imageView);
         }
     }
 
@@ -40,5 +54,18 @@ public abstract class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.Pho
     public void addAll(List<Photo> photos) {
         this.photos.addAll(photos);
         notifyDataSetChanged();
+    }
+
+    protected abstract PhotoViewHolder getHolder(View view);
+
+    protected abstract int getLayout();
+
+    protected class PhotoViewHolder extends RecyclerView.ViewHolder {
+        protected ImageView imageView;
+
+        PhotoViewHolder(View itemView) {
+            super(itemView);
+            imageView = (ImageView) itemView.findViewById(R.id.photoImage);
+        }
     }
 }

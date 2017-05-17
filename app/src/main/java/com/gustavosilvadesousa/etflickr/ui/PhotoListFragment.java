@@ -123,7 +123,7 @@ public class PhotoListFragment extends Fragment {
         if (ConnectionUtils.isConnectionAvailable(getActivity())) {
             FlickrService flickrService = FlickrService.getInstance();
 
-            Call<SearchPhotosResponse> call = flickrService.getFlickrApi().getPhotos("154797495@N05");
+            Call<SearchPhotosResponse> call = flickrService.getPublicPhotos("154797495@N05");
 
             call.enqueue(new Callback<SearchPhotosResponse>() {
                 @Override
