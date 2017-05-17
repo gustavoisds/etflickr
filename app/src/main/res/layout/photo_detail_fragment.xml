@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/photoImage"
+        android:layout_width="match_parent"
+        android:layout_height="300dp" />
+
+    <TextView
+        android:id="@+id/userName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        tools:text="daphneall"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_below="@id/photoImage"/>
+
+    <TextView
+        android:id="@+id/photoTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Decorative Museum"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:textSize="14sp"
+        android:layout_below="@id/userName"/>
+
+    <TextView
+        android:id="@+id/photoDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="2 dic"
+        android:padding="16dp"
+        android:textSize="14sp"
+        android:layout_alignBaseline="@id/userName"
+        android:layout_alignParentRight="true"/>
+
+    <TextView
+        android:id="@+id/photoDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Foto sacas en asdadasdsadas  sads "
+        android:padding="16dp"
+        android:textSize="14sp"
+        android:layout_below="@id/photoTitle" />
+
+</RelativeLayout>

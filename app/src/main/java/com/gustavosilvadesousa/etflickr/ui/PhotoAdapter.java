@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.gustavosilvadesousa.etflickr.R;
-import com.gustavosilvadesousa.etflickr.domain.Photo;
+import com.gustavosilvadesousa.etflickr.domain.PhotoSimple;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
@@ -16,9 +16,10 @@ import java.util.List;
 
 public abstract class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoViewHolder> {
 
-    protected List<Photo> photos = new ArrayList<>();
+    protected List<PhotoSimple> photos = new ArrayList<>();
+    protected OnPhotoClickedListener onPhotoClickedListener;
 
-    public PhotoAdapter(List<Photo> photos) {
+    public PhotoAdapter(List<PhotoSimple> photos) {
         this.photos = photos;
     }
 
@@ -35,7 +36,17 @@ public abstract class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.Pho
     }
 
     @Override
-    public void onBindViewHolder(PhotoViewHolder holder, int position) {
+    public void onBindViewHolder(PhotoViewHolder holder, final int position) {
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (onPhotoClickedListener != null) {
+                    onPhotoClickedListener.onPhotoClicked(position);
+                }
+            }
+        });
+
+
         String urlImage = photos.get(position).getUrl();
         if ((urlImage != null) && (!urlImage.isEmpty())) {
             Picasso.with(holder.imageView.getContext())
@@ -51,7 +62,7 @@ public abstract class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.Pho
         notifyDataSetChanged();
     }
 
-    public void addAll(List<Photo> photos) {
+    public void addAll(List<PhotoSimple> photos) {
         this.photos.addAll(photos);
         notifyDataSetChanged();
     }
@@ -60,12 +71,22 @@ public abstract class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.Pho
 
     protected abstract int getLayout();
 
-    protected class PhotoViewHolder extends RecyclerView.ViewHolder {
+    public void setOnPhotoClickedListener(OnPhotoClickedListener onPhotoClickedListener) {
+        this.onPhotoClickedListener = onPhotoClickedListener;
+    }
+
+    protected class PhotoViewHolder extends RecyclerView.ViewHolder{
         protected ImageView imageView;
 
         PhotoViewHolder(View itemView) {
             super(itemView);
             imageView = (ImageView) itemView.findViewById(R.id.photoImage);
+
         }
+
+    }
+
+    public interface OnPhotoClickedListener {
+        void onPhotoClicked(int position);
     }
 }

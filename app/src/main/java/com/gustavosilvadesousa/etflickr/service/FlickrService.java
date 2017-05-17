@@ -88,7 +88,11 @@ public class FlickrService {
         httpClient.addInterceptor(signatureInterceptor);
     }
 
-    public Call<SearchPhotosResponse> getPublicPhotos(String userId) {
+    public Call<GetPhotosResponse> getPublicPhotos(String userId) {
         return flickrApi.getPhotos(userId, "1");
+    }
+
+    public Call<GetPhotoDetailResponse> getPhotoDetail(String userId, String photoId) {
+        return flickrApi.getPhotoDetail(userId, photoId);
     }
 }

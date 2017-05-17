@@ -4,13 +4,13 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.gustavosilvadesousa.etflickr.R;
-import com.gustavosilvadesousa.etflickr.domain.Photo;
+import com.gustavosilvadesousa.etflickr.domain.PhotoSimple;
 
 import java.util.List;
 
 public class PhotoRowAdapter extends PhotoAdapter {
 
-    public PhotoRowAdapter(List<Photo> photos) {
+    public PhotoRowAdapter(List<PhotoSimple> photos) {
         super(photos);
     }
 

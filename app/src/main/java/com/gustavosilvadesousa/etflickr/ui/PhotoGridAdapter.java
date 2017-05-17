@@ -3,13 +3,13 @@ package com.gustavosilvadesousa.etflickr.ui;
 import android.view.View;
 
 import com.gustavosilvadesousa.etflickr.R;
-import com.gustavosilvadesousa.etflickr.domain.Photo;
+import com.gustavosilvadesousa.etflickr.domain.PhotoSimple;
 
 import java.util.List;
 
 public class PhotoGridAdapter extends PhotoAdapter {
 
-    public PhotoGridAdapter(List<Photo> photos) {
+    public PhotoGridAdapter(List<PhotoSimple> photos) {
         super(photos);
     }
 

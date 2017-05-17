@@ -1,5 +1,6 @@
 package com.gustavosilvadesousa.etflickr.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -17,9 +18,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.gustavosilvadesousa.etflickr.R;
-import com.gustavosilvadesousa.etflickr.domain.Photo;
+import com.gustavosilvadesousa.etflickr.domain.PhotoSimple;
 import com.gustavosilvadesousa.etflickr.service.FlickrService;
-import com.gustavosilvadesousa.etflickr.service.SearchPhotosResponse;
+import com.gustavosilvadesousa.etflickr.service.GetPhotosResponse;
 import com.gustavosilvadesousa.etflickr.utils.ConnectionUtils;
 
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class PhotoListFragment extends Fragment {
+public class PhotoListFragment extends Fragment implements PhotoAdapter.OnPhotoClickedListener{
 
     private RecyclerView mRecyclerView;
     private PhotoAdapter adapter;
@@ -37,7 +38,7 @@ public class PhotoListFragment extends Fragment {
     private Snackbar snackbar;
     private boolean gridView = false;
 
-    private List<Photo> photos = new ArrayList<>();
+    private List<PhotoSimple> photos = new ArrayList<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,9 +60,10 @@ public class PhotoListFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
-        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setHasFixedSize(false);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         adapter = new PhotoRowAdapter(photos);
+        adapter.setOnPhotoClickedListener(this);
         mRecyclerView.setAdapter(adapter);
 
         swipeContainer = (SwipeRefreshLayout)view.findViewById(R.id.swipeContainer);
@@ -113,7 +115,8 @@ public class PhotoListFragment extends Fragment {
     private void swapLayoutManager() {
         gridView = !gridView;
         RecyclerView.LayoutManager manager = gridView ? new GridLayoutManager(getActivity(), 3) : new LinearLayoutManager(getActivity());
-        RecyclerView.Adapter adapter = gridView ? new PhotoGridAdapter(photos) : new PhotoRowAdapter(photos);
+        PhotoAdapter adapter = gridView ? new PhotoGridAdapter(photos) : new PhotoRowAdapter(photos);
+        adapter.setOnPhotoClickedListener(this);
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.swapAdapter(adapter, true);
     }
@@ -123,15 +126,15 @@ public class PhotoListFragment extends Fragment {
         if (ConnectionUtils.isConnectionAvailable(getActivity())) {
             FlickrService flickrService = FlickrService.getInstance();
 
-            Call<SearchPhotosResponse> call = flickrService.getPublicPhotos("154797495@N05");
+            Call<GetPhotosResponse> call = flickrService.getPublicPhotos("154797495@N05");
 
-            call.enqueue(new Callback<SearchPhotosResponse>() {
+            call.enqueue(new Callback<GetPhotosResponse>() {
                 @Override
-                public void onResponse(Call<SearchPhotosResponse> call, Response<SearchPhotosResponse> response) {
+                public void onResponse(Call<GetPhotosResponse> call, Response<GetPhotosResponse> response) {
 
                     try {
-                        SearchPhotosResponse searchPhotosResponse = response.body();
-                        photos = searchPhotosResponse.getPhotoInfo().getPhotos();
+                        GetPhotosResponse getPhotosResponse = response.body();
+                        photos = getPhotosResponse.getPhotoInfo().getPhotos();
                         updateView();
                     } catch (Exception e) {
                         Log.d("onResponse", "There is an error");
@@ -140,7 +143,7 @@ public class PhotoListFragment extends Fragment {
                 }
 
                 @Override
-                public void onFailure(Call<SearchPhotosResponse> call, Throwable t) {
+                public void onFailure(Call<GetPhotosResponse> call, Throwable t) {
                     Log.d("onFailure", t.getMessage());
                 }
             });
@@ -166,5 +169,12 @@ public class PhotoListFragment extends Fragment {
 
     private void stopLoading() {
         swipeContainer.setRefreshing(false);
+    }
+
+    @Override
+    public void onPhotoClicked(int position) {
+        Intent intent = new Intent(getActivity(), PhotoDetailActivity.class);
+        intent.putExtra(PhotoDetailActivity.PHOTO_ID, photos.get(position).getId());
+        startActivity(intent);
     }
 }
