@@ -15,6 +15,7 @@ import com.gustavosilvadesousa.etflickr.domain.PhotoFull;
 import com.gustavosilvadesousa.etflickr.service.FlickrService;
 import com.gustavosilvadesousa.etflickr.service.GetPhotoDetailResponse;
 import com.gustavosilvadesousa.etflickr.utils.ConnectionUtils;
+import com.gustavosilvadesousa.etflickr.utils.DateUtils;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
@@ -54,7 +55,6 @@ public class PhotoDetailFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.photo_detail_fragment, container, false);
         return rootView;
     }
-
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -107,11 +107,7 @@ public class PhotoDetailFragment extends Fragment {
             userName.setText("dasdas");
             photoDescription.setText(photo.getDescription().getContent());
             photoTitle.setText(photo.getTitle().getContent());
-            photoDate.setText(photo.getDateUploaded());
-            DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-
-            long dateLong = Long.parseLong(photo.getDateUploaded());
-            photoDate.setText(df.format(new Date(dateLong*1000)));
+            photoDate.setText(DateUtils.formatTimestamp(photo.getDateUploaded()));
         }
 
     }
