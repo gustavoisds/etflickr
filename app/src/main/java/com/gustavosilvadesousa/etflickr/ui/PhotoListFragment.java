@@ -21,6 +21,7 @@ import com.gustavosilvadesousa.etflickr.R;
 import com.gustavosilvadesousa.etflickr.domain.PhotoSimple;
 import com.gustavosilvadesousa.etflickr.service.FlickrService;
 import com.gustavosilvadesousa.etflickr.service.GetPhotosResponse;
+import com.gustavosilvadesousa.etflickr.service.PhotoInfo;
 import com.gustavosilvadesousa.etflickr.utils.ConnectionUtils;
 
 import java.util.ArrayList;
@@ -33,19 +34,27 @@ import retrofit2.Response;
 public class PhotoListFragment extends Fragment implements PhotoAdapter.OnPhotoClickedListener{
 
     private RecyclerView mRecyclerView;
+    private LinearLayoutManager layoutManager;
     private PhotoAdapter adapter;
     private SwipeRefreshLayout swipeContainer;
     private Snackbar snackbar;
     private boolean gridView = false;
 
     private List<PhotoSimple> photos = new ArrayList<>();
+    private PhotoInfo photosInfo;
+
+    private static final int PAGE_START = 1;
+    private boolean isLastPage = false;
+    private boolean isLoading = false;
+    private int currentPage = PAGE_START;
+    private int PAGE_SIZE = 3;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
         setHasOptionsMenu(true);
-        fetchPhotos();
+        fetchFirstPage();
     }
 
     @Nullable
@@ -61,17 +70,44 @@ public class PhotoListFragment extends Fragment implements PhotoAdapter.OnPhotoC
         super.onViewCreated(view, savedInstanceState);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(false);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        adapter = new PhotoRowAdapter(photos);
+
+        layoutManager = new LinearLayoutManager(getActivity());
+        mRecyclerView.setLayoutManager(layoutManager);
+        adapter = new PhotoRowAdapter();
         adapter.setOnPhotoClickedListener(this);
         mRecyclerView.setAdapter(adapter);
+
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                int visibleItemCount = layoutManager.getChildCount();
+                int totalItemCount = layoutManager.getItemCount();
+                int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+
+                if (!isLoading && !isLastPage) {
+                    if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount && firstVisibleItemPosition >= 0
+                            && totalItemCount >= PAGE_SIZE) {
+                        isLoading = true;
+                        currentPage += 1;
+                        fetchPhotos();
+                    }
+                }
+            }
+        });
+
 
         swipeContainer = (SwipeRefreshLayout)view.findViewById(R.id.swipeContainer);
         // Setup refresh listener which triggers new data loading
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                fetchPhotos();
+//                fetchPhotos();
             }
         });
         // Configure the refreshing colors
@@ -104,10 +140,15 @@ public class PhotoListFragment extends Fragment implements PhotoAdapter.OnPhotoC
     }
 
     private void updateView() {
-        adapter.clear();
-        adapter.addAll(photos);
+        adapter.addAll(photosInfo.getPhotos());
         if (snackbar != null && snackbar.isShown()) {
             snackbar.dismiss();
+        }
+        if (currentPage < photosInfo.getPages()) {
+            adapter.addLoadingFooter();
+        }
+        else {
+            isLastPage = true;
         }
         stopLoading();
     }
@@ -115,7 +156,7 @@ public class PhotoListFragment extends Fragment implements PhotoAdapter.OnPhotoC
     private void swapLayoutManager() {
         gridView = !gridView;
         RecyclerView.LayoutManager manager = gridView ? new GridLayoutManager(getActivity(), 3) : new LinearLayoutManager(getActivity());
-        PhotoAdapter adapter = gridView ? new PhotoGridAdapter(photos) : new PhotoRowAdapter(photos);
+        PhotoAdapter adapter = gridView ? new PhotoGridAdapter() : new PhotoRowAdapter();
         adapter.setOnPhotoClickedListener(this);
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.swapAdapter(adapter, true);
@@ -126,15 +167,63 @@ public class PhotoListFragment extends Fragment implements PhotoAdapter.OnPhotoC
         if (ConnectionUtils.isConnectionAvailable(getActivity())) {
             FlickrService flickrService = FlickrService.getInstance();
 
-            Call<GetPhotosResponse> call = flickrService.getPublicPhotos("154797495@N05");
+            Call<GetPhotosResponse> call = flickrService.getPublicPhotos("154797495@N05", PAGE_SIZE, currentPage);
 
             call.enqueue(new Callback<GetPhotosResponse>() {
                 @Override
                 public void onResponse(Call<GetPhotosResponse> call, Response<GetPhotosResponse> response) {
 
                     try {
-                        GetPhotosResponse getPhotosResponse = response.body();
-                        photos = getPhotosResponse.getPhotoInfo().getPhotos();
+                        adapter.removeLoadingFooter();
+                        photosInfo = response.body().getPhotoInfo();
+                        photos.addAll(photosInfo.getPhotos());
+                        updateView();
+                    } catch (Exception e) {
+                        Log.d("onResponse", "There is an error");
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<GetPhotosResponse> call, Throwable t) {
+                    Log.d("onFailure", t.getMessage());
+                }
+            });
+        }
+        else {
+            showSnackbar();
+        }
+    }
+
+    private void showSnackbar() {
+        stopLoading();
+        snackbar = Snackbar.make(swipeContainer, "No network connection", Snackbar.LENGTH_INDEFINITE)
+                .setAction("RETRY", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        showLoading();
+                        fetchPhotos();
+                    }
+                })
+                .setActionTextColor(getResources().getColor(android.R.color.holo_red_light ));
+        snackbar.show();
+    }
+
+
+    private void fetchFirstPage() {
+
+        if (ConnectionUtils.isConnectionAvailable(getActivity())) {
+            FlickrService flickrService = FlickrService.getInstance();
+
+            Call<GetPhotosResponse> call = flickrService.getPublicPhotos("154797495@N05", PAGE_SIZE, currentPage);
+
+            call.enqueue(new Callback<GetPhotosResponse>() {
+                @Override
+                public void onResponse(Call<GetPhotosResponse> call, Response<GetPhotosResponse> response) {
+
+                    try {
+                        photosInfo = response.body().getPhotoInfo();
+                        photos.addAll(photosInfo.getPhotos());
                         updateView();
                     } catch (Exception e) {
                         Log.d("onResponse", "There is an error");
@@ -155,7 +244,7 @@ public class PhotoListFragment extends Fragment implements PhotoAdapter.OnPhotoC
                         @Override
                         public void onClick(View view) {
                             showLoading();
-                            fetchPhotos();
+//                            fetchPhotos();
                         }
                     })
                     .setActionTextColor(getResources().getColor(android.R.color.holo_red_light ));

@@ -1,5 +1,6 @@
 package com.gustavosilvadesousa.etflickr.ui;
 
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
@@ -10,16 +11,23 @@ import java.util.List;
 
 public class PhotoRowAdapter extends PhotoAdapter {
 
-    public PhotoRowAdapter(List<PhotoSimple> photos) {
-        super(photos);
+    public PhotoRowAdapter() {
+        super();
     }
 
     @Override
-    public void onBindViewHolder(PhotoViewHolder holder, int position) {
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         super.onBindViewHolder(holder, position);
-        PhotoRowViewHolder photoRowViewHolder = (PhotoRowViewHolder)holder;
-        photoRowViewHolder.userName.setText("gusisds");
-        photoRowViewHolder.photoTitle.setText(photos.get(position).getTitle());
+        switch (getItemViewType(holder.getAdapterPosition())) {
+            case ITEM:
+                PhotoRowViewHolder photoRowViewHolder = (PhotoRowViewHolder)holder;
+                photoRowViewHolder.userName.setText("gusisds");
+                photoRowViewHolder.photoTitle.setText(photos.get(position).getTitle());
+                break;
+            case LOADING:
+//                Do nothing
+                break;
+        }
     }
 
     @Override

@@ -11,7 +11,9 @@ public interface FlickrApi {
 
     @GET("/services/rest?method=flickr.photos.search")
     Call<GetPhotosResponse> getPhotos(@Query("user_id")String user,
-                                      @Query("privacy_filter") String privacyFilter);
+                                      @Query("per_page")int perPage,
+                                      @Query("page") int page,
+                                      @Query("privacy_filter") int privacyFilter);
 
     @GET("/services/rest?method=flickr.photos.getInfo")
     Call<GetPhotoDetailResponse> getPhotoDetail(@Query("user_id")String user,

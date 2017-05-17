@@ -9,8 +9,8 @@ import java.util.List;
 
 public class PhotoGridAdapter extends PhotoAdapter {
 
-    public PhotoGridAdapter(List<PhotoSimple> photos) {
-        super(photos);
+    public PhotoGridAdapter() {
+        super();
     }
 
     @Override

@@ -23,6 +23,7 @@ public class FlickrService {
     private static final String NOJSONCALLBACK = "nojsoncallback";
     private static final String MINI_TOKEN = "mini_token";
     private static final String AUTH_TOKEN = "auth_token";
+    private static final int PUBLIC_PHOTOS = 1;
 
     private static FlickrService INSTANCE = new FlickrService();
 
@@ -69,10 +70,10 @@ public class FlickrService {
                 HttpUrl originalHttpUrl = original.url();
 
                 HttpUrl url = originalHttpUrl.newBuilder()
-                        .addQueryParameter(API_KEY, "1b4c450c1feb07a5bc17981308124c06")
+                        .addQueryParameter(API_KEY, PUBLIC_PHOTOS + "b4c450c1feb07a5bc17981308124c06")
                         .addQueryParameter(FORMAT, "json")
-                        .addQueryParameter(AUTH_TOKEN,"72157680757377963-b457215f031ddeb9" )
-                        .addQueryParameter(NOJSONCALLBACK,"1")
+                        .addQueryParameter(AUTH_TOKEN, "72" + PUBLIC_PHOTOS + "57680757377963-b457215f031ddeb9")
+                        .addQueryParameter(NOJSONCALLBACK, "1")
                         .build();
 
                 // Request customization: add request headers
@@ -88,8 +89,8 @@ public class FlickrService {
         httpClient.addInterceptor(signatureInterceptor);
     }
 
-    public Call<GetPhotosResponse> getPublicPhotos(String userId) {
-        return flickrApi.getPhotos(userId, "1");
+    public Call<GetPhotosResponse> getPublicPhotos(String userId, int perPage, int page) {
+        return flickrApi.getPhotos(userId, perPage, page,PUBLIC_PHOTOS);
     }
 
     public Call<GetPhotoDetailResponse> getPhotoDetail(String userId, String photoId) {
